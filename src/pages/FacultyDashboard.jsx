@@ -37,6 +37,7 @@ function FacultyDashboard() {
   const [error, setError] = useState("");
   const [remarksFor, setRemarksFor] = useState(null);
   const [remarks, setRemarks] = useState("");
+  const [processingId, setProcessingId] = useState(null);
 
   // Route Protection
   useEffect(() => {
@@ -83,12 +84,15 @@ function FacultyDashboard() {
   };
 
   const approve = async (eventId) => {
+    setProcessingId(eventId);
     try {
       await api.post(`/api/events/${eventId}/approve`, { remarks: "" });
       loadPending();
       loadAllEvents();
     } catch (err) {
       alert(apiErrorMessage(err, "Approval failed."));
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -102,6 +106,7 @@ function FacultyDashboard() {
       alert("Remarks are required when rejecting an event.");
       return;
     }
+    setProcessingId(eventId);
     try {
       await api.post(`/api/events/${eventId}/reject`, { remarks });
       setRemarksFor(null);
@@ -109,6 +114,8 @@ function FacultyDashboard() {
       loadAllEvents();
     } catch (err) {
       alert(apiErrorMessage(err, "Rejection failed."));
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -152,11 +159,11 @@ function FacultyDashboard() {
           </li>
 
           {role === "SUPER_ADMIN" && (
-            <li onClick={() => navigate("/venues")}>Manage Venues</li>
+            <li onClick={() => { setOpen(false); navigate("/venues"); }}>Manage Venues</li>
           )}
-          <li onClick={() => navigate("/reports")}>Reports</li>
-          <li onClick={() => navigate("/calendar")}>Event Calendar</li>
-          <li onClick={() => navigate("/notifications")}>Notifications</li>
+          <li onClick={() => { setOpen(false); navigate("/reports"); }}>Reports</li>
+          <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>
+          <li onClick={() => { setOpen(false); navigate("/notifications"); }}>Notifications</li>
         </ul>
 
         <button className="logout-btn" onClick={logout}>
@@ -210,8 +217,12 @@ function FacultyDashboard() {
                     <td>{e.venueName}</td>
                     <td>{new Date(e.startTime).toLocaleString()}</td>
                     <td className="inline-actions">
-                      <button onClick={() => approve(e.id)}>Approve</button>
-                      <button className="danger" onClick={() => openReject(e.id)}>Reject</button>
+                      <button onClick={() => approve(e.id)} disabled={processingId === e.id}>
+                        {processingId === e.id ? <><span className="spinner"></span>Approving...</> : "Approve"}
+                      </button>
+                      <button className="danger" onClick={() => openReject(e.id)} disabled={processingId === e.id}>
+                        Reject
+                      </button>
                     </td>
                   </tr>
                   {remarksFor === e.id && (
@@ -224,8 +235,10 @@ function FacultyDashboard() {
                           onChange={(ev) => setRemarks(ev.target.value)}
                         />
                         <div className="inline-actions" style={{ marginTop: 8 }}>
-                          <button className="danger" onClick={() => submitReject(e.id)}>Confirm Reject</button>
-                          <button className="secondary" onClick={() => setRemarksFor(null)}>Cancel</button>
+                          <button className="danger" onClick={() => submitReject(e.id)} disabled={processingId === e.id}>
+                            {processingId === e.id ? <><span className="spinner"></span>Rejecting...</> : "Confirm Reject"}
+                          </button>
+                          <button className="secondary" onClick={() => setRemarksFor(null)} disabled={processingId === e.id}>Cancel</button>
                         </div>
                       </td>
                     </tr>

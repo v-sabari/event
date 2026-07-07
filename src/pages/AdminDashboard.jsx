@@ -39,11 +39,11 @@ function AdminDashboard() {
       <div className={`sidebar ${open ? "active" : ""}`}>
         <h2>Admin Panel</h2>
         <ul>
-          <li onClick={() => navigate("/dashboard")}>Overview</li>
-          <li onClick={() => navigate("/reports")}>Reports</li>
-          <li onClick={() => navigate("/venues")}>Manage Venues</li>
-          <li onClick={() => navigate("/calendar")}>Event Calendar</li>
-          <li onClick={() => navigate("/events")}>Search Events</li>
+          <li onClick={() => { setOpen(false); navigate("/dashboard"); }}>Overview</li>
+          <li onClick={() => { setOpen(false); navigate("/reports"); }}>Reports</li>
+          <li onClick={() => { setOpen(false); navigate("/venues"); }}>Manage Venues</li>
+          <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>
+          <li onClick={() => { setOpen(false); navigate("/events"); }}>Search Events</li>
         </ul>
         <button className="logout-btn" onClick={logout}>Logout</button>
       </div>

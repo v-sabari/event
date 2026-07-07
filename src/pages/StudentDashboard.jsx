@@ -28,6 +28,7 @@ function StudentDashboard() {
   const [qrImage, setQrImage] = useState(null); // object URL for the QR modal
   const [feedbackFor, setFeedbackFor] = useState(null);
   const [feedbackForm, setFeedbackForm] = useState({ rating: 5, comments: "" });
+  const [processingId, setProcessingId] = useState(null); // id of the event/registration currently being acted on
 
   // Route Protection (fixed to match the real backend role value: "STUDENT")
   useEffect(() => {
@@ -97,23 +98,29 @@ function StudentDashboard() {
     }
 
     try {
+      setProcessingId(event.id);
       const res = await api.post(`/api/events/${event.id}/registrations`);
       alert(res.data.message);
       fetchRegistrations();
       fetchEvents();
     } catch (err) {
       alert(apiErrorMessage(err, "Registration failed."));
+    } finally {
+      setProcessingId(null);
     }
   };
 
   const handleCancelRegistration = async (registrationId) => {
     if (!window.confirm("Cancel this registration?")) return;
     try {
+      setProcessingId(registrationId);
       await api.delete(`/api/registrations/${registrationId}`);
       fetchRegistrations();
       fetchEvents();
     } catch (err) {
       alert(apiErrorMessage(err, "Could not cancel registration."));
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -142,12 +149,15 @@ function StudentDashboard() {
 
   const submitFeedback = async (eventId) => {
     try {
+      setProcessingId(eventId);
       await api.post(`/api/events/${eventId}/feedback`, feedbackForm);
       alert("Thank you for your feedback!");
       setFeedbackFor(null);
       setFeedbackForm({ rating: 5, comments: "" });
     } catch (err) {
       alert(apiErrorMessage(err, "Could not submit feedback."));
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -204,8 +214,8 @@ function StudentDashboard() {
             My Registrations
           </li>
 
-          <li onClick={() => navigate("/calendar")}>Event Calendar</li>
-          <li onClick={() => navigate("/notifications")}>Notifications</li>
+          <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>
+          <li onClick={() => { setOpen(false); navigate("/notifications"); }}>Notifications</li>
         </ul>
 
         <button className="logout-btn" onClick={logout}>
@@ -262,10 +272,12 @@ function StudentDashboard() {
                   <td>
                     <button
                       className="inline-actions"
-                      disabled={isRegistered(e.id)}
+                      disabled={isRegistered(e.id) || processingId === e.id}
                       onClick={() => handleRegister(e)}
                     >
-                      {isRegistered(e.id) ? "Registered" : "Register"}
+                      {processingId === e.id ? (
+                        <><span className="spinner"></span>Registering...</>
+                      ) : isRegistered(e.id) ? "Registered" : "Register"}
                     </button>
                   </td>
                 </tr>
@@ -298,7 +310,9 @@ function StudentDashboard() {
                         <button onClick={() => viewQrPass(r.id)}>View QR Pass</button>
                       )}
                       {(r.status === "REGISTERED" || r.status === "WAITLISTED") && (
-                        <button className="danger" onClick={() => handleCancelRegistration(r.id)}>Cancel</button>
+                        <button className="danger" disabled={processingId === r.id} onClick={() => handleCancelRegistration(r.id)}>
+                          {processingId === r.id ? <><span className="spinner"></span>Cancelling...</> : "Cancel"}
+                        </button>
                       )}
                       {r.status === "ATTENDED" && (
                         <>
@@ -325,7 +339,9 @@ function StudentDashboard() {
                             onChange={(ev) => setFeedbackForm({ ...feedbackForm, comments: ev.target.value })}
                           />
                           <div className="inline-actions" style={{ marginTop: 10 }}>
-                            <button onClick={() => submitFeedback(r.eventId)}>Submit</button>
+                            <button disabled={processingId === r.eventId} onClick={() => submitFeedback(r.eventId)}>
+                              {processingId === r.eventId ? <><span className="spinner"></span>Submitting...</> : "Submit"}
+                            </button>
                             <button className="secondary" onClick={() => setFeedbackFor(null)}>Cancel</button>
                           </div>
                         </div>

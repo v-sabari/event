@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api, { auth, apiErrorMessage } from "../services/api";
+import "./Dashboard.css"; // reuse the existing .spinner class for the loading button state
 
 
 function Login() {
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -20,6 +22,9 @@ function Login() {
       return;
     }
 
+    setLoading(true);
+    setError("");
+
     try {
 
       const res = await api.post("/api/auth/login", {
@@ -30,12 +35,15 @@ function Login() {
       // Store auth data (access token, refresh token, and user profile)
       auth.setSession(res.data.data);
 
-      setError("");
       navigate("/dashboard");
 
     } catch (err) {
       setError(apiErrorMessage(err, "Invalid Reg Number or Password!"));
+      setLoading(false);
     }
+    // Deliberately not resetting `loading` on success - the navigate() away
+    // means this component unmounts anyway, and keeping the button disabled/
+    // spinning until then avoids a double-submit while the redirect happens.
   };
 
   return (
@@ -43,32 +51,46 @@ function Login() {
 
       <form className="L" onSubmit={handleLogin}>
 
-        <h2 style={{ marginBottom: "20px" }}>
-          Campus Connect Login
-        </h2>
+        <div className="login-brand">CC</div>
 
-        <div>
-          Reg Number:
+        <h2>Campus Connect</h2>
+        <p className="login-subtitle">Sign in to your account</p>
+
+        <div className="login-field">
+          <label htmlFor="reg">Registration Number</label>
           <input
+            id="reg"
             type="text"
             name="reg"
-            placeholder="Enter your Reg Number"
+            placeholder="e.g. SA001"
+            autoComplete="username"
+            disabled={loading}
           />
         </div>
 
-        <div>
-          Password:
+        <div className="login-field">
+          <label htmlFor="pass">Password</label>
           <input
+            id="pass"
             type="password"
             name="pass"
-            placeholder="Enter your Password"
+            placeholder="Enter your password"
+            autoComplete="current-password"
+            disabled={loading}
           />
         </div>
 
         {error && <div id="result">{error}</div>}
 
-        <button type="submit" className="result">
-          Login
+        <button type="submit" className="result" disabled={loading}>
+          {loading ? (
+            <>
+              <span className="spinner"></span>
+              Signing in...
+            </>
+          ) : (
+            "Login"
+          )}
         </button>
 
       </form>

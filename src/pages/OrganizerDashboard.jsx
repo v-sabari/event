@@ -119,9 +119,9 @@ function OrganizerDashboard() {
       <div className={`sidebar ${open ? "active" : ""}`}>
         <h2>Organizer Panel</h2>
         <ul>
-          <li onClick={() => navigate("/organizer")}>My Events</li>
-          <li onClick={() => navigate("/create-event")}>+ Create Event</li>
-          <li onClick={() => navigate("/calendar")}>Event Calendar</li>
+          <li onClick={() => { setOpen(false); navigate("/organizer"); }}>My Events</li>
+          <li onClick={() => { setOpen(false); navigate("/create-event"); }}>+ Create Event</li>
+          <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>
         </ul>
         <button className="logout-btn" onClick={logout}>Logout</button>
       </div>

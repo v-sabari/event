@@ -35,19 +35,36 @@ body {
   border: none;
   color: white;
   cursor: pointer;
+  transition: transform 150ms ease, color 150ms ease;
 }
 
-/* Sidebar */
+.menu-btn:hover {
+  color: #38bdf8;
+}
+
+.menu-btn:active {
+  transform: scale(0.88);
+}
+
+/* Sidebar
+   FIX: previously had no z-index, which meant it was compared against the
+   overlay's explicit z-index:900 as if it were z-index:0 - so the overlay
+   (rendered whenever the sidebar is open) painted ON TOP of the sidebar,
+   making it look broken/dim/unclickable on every toggle. Sidebar now sits
+   between the overlay and the topbar, where it belongs. */
 .sidebar {
   position: fixed;
   top: 60px;
-  left: -250px;
-  width: 250px;
+  left: -260px;
+  width: 260px;
   height: calc(100% - 60px);
   background: #0f172a;
   color: white;
-  padding: 20px;
-  transition: 0.3s ease;
+  padding: 24px 20px;
+  transition: left 280ms cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 950;
+  overflow-y: auto;
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
 }
 
 .sidebar.active {
@@ -64,29 +81,42 @@ body {
 }
 
 .sidebar ul li {
-  margin: 15px 0;
+  margin: 6px 0;
+  padding: 10px 12px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
 }
 
 .sidebar ul li:hover,
 .sidebar ul li.active-link {
   color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+}
+
+.sidebar ul li:active {
+  transform: scale(0.97);
 }
 
 .sidebar button {
   margin-top: 20px;
-  padding: 8px 12px;
+  padding: 10px 12px;
   width: 100%;
   background: #ef4444;
   border: none;
   color: white;
   cursor: pointer;
-  border-radius: 5px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: background 150ms ease, transform 150ms ease;
 }
 
 .sidebar button:hover {
   background: #dc2626;
+}
+
+.sidebar button:active {
+  transform: scale(0.96);
 }
 
 /* Main content */
@@ -166,6 +196,10 @@ table td {
   border-bottom: 1px solid #e2e8f0;
 }
 
+table tr {
+  transition: background 120ms ease;
+}
+
 table tr:hover {
   background: #f8fafc;
 }
@@ -179,14 +213,26 @@ table button {
   cursor: pointer;
   background: #2563eb;
   color: white;
-  transition: 0.2s;
+  transition: background 150ms ease, transform 100ms ease;
 }
 
 table button:hover {
   background: #1d4ed8;
 }
 
-/* Overlay (for mobile menu or popup) */
+table button:active {
+  transform: scale(0.94);
+}
+
+table button:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Overlay (for mobile menu or popup)
+   Sits below the sidebar (950) and topbar (1000) so it darkens the page
+   behind the open sidebar without covering it. */
 .overlay {
   position: fixed;
   top: 0;
@@ -194,7 +240,8 @@ table button:hover {
   width: 100%;
   height: 100%;
   background: rgba(0,0,0,0.4);
-  z-index: 999;
+  z-index: 900;
+  animation: fadeIn 200ms ease;
 }
 
 /* Responsive */
@@ -210,6 +257,38 @@ table button:hover {
 
   .table-container {
     overflow-x: auto;
+  }
+}
+
+/* ROOT-CAUSE FIX: the sidebar was coded as an always-off-canvas mobile
+   drawer with no desktop state, and .dashboard-main never made room for it
+   (fixed-position sidebar just floated over content). On screens wide
+   enough for a real dashboard layout, the sidebar is now permanently
+   visible as a nav rail, the hamburger/overlay are hidden (nothing to
+   toggle), and the content area gets a matching margin-left so nothing
+   sits underneath it. */
+@media (min-width: 769px) {
+  .sidebar {
+    left: 0;
+    box-shadow: none;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .menu-btn {
+    display: none;
+  }
+
+  .overlay {
+    display: none;
+  }
+
+  .dashboard-main {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+  }
+
+  .topbar {
+    padding-left: 280px;
   }
 }
 /* ================= Phase 3 additions (extends existing dashboard styles, doesn't replace them) ================= */
@@ -247,11 +326,20 @@ table button:hover {
   background: #2563eb;
   color: white;
   font-size: 13px;
+  transition: background 150ms ease, transform 100ms ease, opacity 150ms ease;
 }
 
 .inline-actions button.danger { background: #dc2626; }
 .inline-actions button.secondary { background: #6b7280; }
 .inline-actions button:hover { opacity: 0.9; }
+.inline-actions button:active { transform: scale(0.94); }
+.inline-actions button:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+  transform: none;
+  opacity: 1;
+}
 
 .form-card {
   background: white;
@@ -293,7 +381,8 @@ table button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 1100;
+  animation: fadeIn 180ms ease;
 }
 
 .qr-modal {
@@ -301,6 +390,7 @@ table button:hover {
   padding: 24px;
   border-radius: 10px;
   text-align: center;
+  animation: slideUp 220ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .qr-modal img { width: 250px; height: 250px; }
@@ -312,4 +402,86 @@ table button:hover {
   padding: 8px;
   border-radius: 6px;
   border: 1px solid #ccc;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.remarks-box:focus {
+  outline: none;
+  border-color: #0d9488;
+  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+}
+
+/* ================= Animations & Micro-interactions ================= */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Every dashboard page's main content area fades/slides in on mount instead
+   of just snapping into view - makes navigation feel intentional. */
+.dashboard-main {
+  animation: slideUp 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stat cards and table rows cascade in slightly staggered for a premium feel
+   rather than all appearing at once. */
+.stats-container .stat-card {
+  animation: slideUp 360ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+.stats-container .stat-card:nth-child(1) { animation-delay: 0ms; }
+.stats-container .stat-card:nth-child(2) { animation-delay: 60ms; }
+.stats-container .stat-card:nth-child(3) { animation-delay: 120ms; }
+.stats-container .stat-card:nth-child(4) { animation-delay: 180ms; }
+.stats-container .stat-card:nth-child(5) { animation-delay: 240ms; }
+
+/* Generic inline loading spinner - use with a small <span className="spinner" />
+   inside a button while an async action is in flight. */
+.spinner {
+  display: inline-block;
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 600ms linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* Skeleton placeholder for content that's still loading (rows/cards). */
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: 6px;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* Respect users who've asked for reduced motion - disable all decorative
+   animation/transition instead of forcing it on them. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

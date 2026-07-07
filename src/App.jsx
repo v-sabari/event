@@ -12,12 +12,15 @@ import Calendar from "./pages/Calendar.jsx";
 import VenueManagement from "./pages/VenueManagement.jsx";
 import Reports from "./pages/Reports.jsx";
 import Notifications from "./pages/Notifications.jsx";
+import CustomCursor from "./components/CustomCursor.jsx";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 function App() {
   return (
     <BrowserRouter>
+
+      <CustomCursor />
 
       {/* ⭐ Global Layout Wrapper */}
       <div style={{ width: "100%", minHeight: "100vh" }}>

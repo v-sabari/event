@@ -7,6 +7,10 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:80
 
 const api = axios.create({
   baseURL: API_BASE_URL,
+  // Without this, a slow or cold-starting backend (e.g. a free-tier host
+  // spinning up from idle) just hangs indefinitely with zero feedback to
+  // the user - it looks exactly like a broken/unresponsive button.
+  timeout: 20000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -93,6 +97,12 @@ api.interceptors.response.use(
 // Small helper so pages can write `const msg = apiErrorMessage(err)` instead
 // of each re-implementing the same `err.response?.data?.message` chain.
 export function apiErrorMessage(error, fallback = "Something went wrong. Please try again.") {
+  if (error?.code === "ECONNABORTED") {
+    return "The server is taking too long to respond (it may be waking up from idle). Please try again in a moment.";
+  }
+  if (!error?.response) {
+    return "Could not reach the server. Check your connection and try again.";
+  }
   return error?.response?.data?.message || fallback;
 }
 
