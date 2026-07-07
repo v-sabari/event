@@ -1,461 +1,519 @@
-/* Reset & font */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Segoe UI', sans-serif;
-}
+/* ============================================================
+   Campus Connect — Dashboard.css (premium dashboard system)
+   Redesign only. All existing class names preserved.
+   ============================================================ */
 
-body {
-  background: #f1f5f9;
-}
-
-/* Main Dashboard Layout */
+/* Layout */
 .dashboard {
   display: flex;
   min-height: 100vh;
+  background:
+    radial-gradient(1200px 500px at 100% -100px, rgba(56,189,248,.07), transparent 60%),
+    radial-gradient(900px 500px at -100px 100%, rgba(13,148,136,.06), transparent 60%),
+    var(--bg);
 }
 
-/* Topbar */
+/* ---------- Topbar ---------- */
 .topbar {
   position: fixed;
   width: 100%;
-  height: 60px;
-  background: #1e293b;
-  color: white;
+  height: 68px;
+  background: rgba(255,255,255,.78);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  color: var(--text);
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 24px;
   z-index: 1000;
+  border-bottom: 1px solid var(--border);
+}
+.topbar::before {
+  content: "Campus Connect";
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin-left: 12px;
 }
 
 .menu-btn {
   font-size: 22px;
-  background: none;
-  border: none;
-  color: white;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
   cursor: pointer;
-  transition: transform 150ms ease, color 150ms ease;
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 160ms ease, transform 120ms ease, border-color 160ms ease;
 }
+.menu-btn:hover { background: var(--brand-50); border-color: var(--brand-300); color: var(--brand-600); }
+.menu-btn:active { transform: scale(0.94); }
 
-.menu-btn:hover {
-  color: #38bdf8;
-}
-
-.menu-btn:active {
-  transform: scale(0.88);
-}
-
-/* Sidebar
-   FIX: previously had no z-index, which meant it was compared against the
-   overlay's explicit z-index:900 as if it were z-index:0 - so the overlay
-   (rendered whenever the sidebar is open) painted ON TOP of the sidebar,
-   making it look broken/dim/unclickable on every toggle. Sidebar now sits
-   between the overlay and the topbar, where it belongs. */
+/* ---------- Sidebar ---------- */
 .sidebar {
   position: fixed;
-  top: 60px;
-  left: -260px;
-  width: 260px;
-  height: calc(100% - 60px);
-  background: #0f172a;
-  color: white;
-  padding: 24px 20px;
+  top: 68px;
+  left: -280px;
+  width: 264px;
+  height: calc(100% - 68px);
+  background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+  color: #e2e8f0;
+  padding: 24px 16px;
   transition: left 280ms cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 950;
   overflow-y: auto;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 8px 0 32px rgba(0,0,0,0.35);
+  border-right: 1px solid rgba(255,255,255,0.05);
 }
-
-.sidebar.active {
-  left: 0;
-}
+.sidebar.active { left: 0; }
 
 .sidebar h2 {
-  margin-bottom: 20px;
-  font-size: 20px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  padding: 4px 12px;
+  margin: 6px 0 14px;
+  color: #94a3b8;
 }
 
-.sidebar ul {
-  list-style: none;
-}
-
+.sidebar ul { list-style: none; display: flex; flex-direction: column; gap: 2px; }
 .sidebar ul li {
-  margin: 6px 0;
-  padding: 10px 12px;
-  border-radius: 8px;
+  position: relative;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+  font-size: 14px;
+  font-weight: 500;
+  color: #cbd5e1;
+  transition: background 150ms ease, color 150ms ease, transform 100ms ease;
 }
-
-.sidebar ul li:hover,
+.sidebar ul li:hover {
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+}
 .sidebar ul li.active-link {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
+  background: rgba(13,148,136,0.16);
+  color: #5eead4;
 }
-
-.sidebar ul li:active {
-  transform: scale(0.97);
+.sidebar ul li.active-link::before {
+  content: "";
+  position: absolute;
+  left: -16px; top: 8px; bottom: 8px;
+  width: 3px; border-radius: 3px;
+  background: var(--brand-500);
 }
+.sidebar ul li:active { transform: scale(0.98); }
 
 .sidebar button {
-  margin-top: 20px;
-  padding: 10px 12px;
+  margin-top: 24px;
+  padding: 11px 14px;
   width: 100%;
-  background: #ef4444;
-  border: none;
-  color: white;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239,68,68,0.35);
+  color: #fca5a5;
   cursor: pointer;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
-  transition: background 150ms ease, transform 150ms ease;
+  font-size: 14px;
+  transition: background 150ms ease, color 150ms ease, transform 120ms ease;
 }
+.sidebar button:hover { background: rgba(239,68,68,0.2); color: #fecaca; }
+.sidebar button:active { transform: scale(0.97); }
 
-.sidebar button:hover {
-  background: #dc2626;
-}
-
-.sidebar button:active {
-  transform: scale(0.96);
-}
-
-/* Main content */
+/* ---------- Main ---------- */
 .dashboard-main {
   flex: 1;
-  margin-top: 60px;
-  padding: 30px;
+  margin-top: 68px;
+  padding: 32px;
   width: 100%;
+  max-width: 100%;
 }
 
 .dashboard-main h1 {
-  margin-bottom: 20px;
-  color: #1e293b;
+  margin-bottom: 6px;
+  color: var(--ink-800);
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.dashboard-main h2 {
+  color: var(--ink-800);
+  margin: 26px 0 14px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.dashboard-main h3 {
+  color: var(--ink-700);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 18px 0 10px;
 }
 
-/* Stat Cards */
+/* ---------- Stat cards ---------- */
 .stats-container {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 30px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
 }
 
 .stat-card {
-  background: #ffffff;
-  padding: 35px 30px;
-  border-radius: 15px;
-  box-shadow: 
-      -5px -5px 15px rgba(255,255,255,0.7),
-      5px 5px 15px rgba(34,163,252,0.15);
-  text-align: center;
-  width: 300px;
-  transition: transform 0.3s, box-shadow 0.3s;
+  position: relative;
+  background: var(--surface);
+  padding: 22px 22px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+  text-align: left;
+  width: auto;
+  min-width: 0;
+  overflow: hidden;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
 }
+.stat-card::before {
+  content: "";
+  position: absolute; inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--grad-brand);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--brand-300);
+}
+.stat-card:hover::before { opacity: 1; }
 
 .stat-card h3 {
-  color: #64748b;
-  margin-bottom: 10px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 10px;
 }
-
 .stat-card p {
-  font-size: 22px;
-  font-weight: bold;
-  color: #1e293b;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--ink-800);
+  letter-spacing: -0.02em;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 
-      -8px -8px 20px rgba(255,255,255,0.8),
-      8px 8px 20px rgba(34,163,252,0.2);
-}
-
-/* Tables */
+/* ---------- Tables ---------- */
 .table-container {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0,0,0,0.05);
-  margin-bottom: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px;
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-xs);
+  margin-bottom: 28px;
+  overflow: hidden;
 }
 
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+  border-radius: 12px;
 }
 
 table th {
-  background: #1e293b;
-  color: white;
-  padding: 12px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-bottom: 1px solid var(--border);
 }
 
 table td {
-  padding: 10px;
-  text-align: center;
-  border-bottom: 1px solid #e2e8f0;
+  padding: 14px;
+  text-align: left;
+  color: var(--text);
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
 }
 
-table tr {
-  transition: background 120ms ease;
-}
+table tr:last-child td { border-bottom: none; }
+table tr { transition: background 120ms ease; }
+table tbody tr:hover { background: var(--surface-2); }
 
-table tr:hover {
-  background: #f8fafc;
-}
-
-/* Table Buttons */
+/* Table action buttons */
 table button {
-  margin: 0 5px;
-  padding: 5px 10px;
+  margin: 0 4px 0 0;
+  padding: 7px 12px;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  background: #2563eb;
+  background: var(--text);
   color: white;
-  transition: background 150ms ease, transform 100ms ease;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 150ms ease, transform 100ms ease, opacity 150ms ease;
 }
+table button:hover { background: var(--ink-700); }
+table button:active { transform: scale(0.96); }
+table button:disabled { background: #cbd5e1; color: #64748b; cursor: not-allowed; transform: none; }
 
-table button:hover {
-  background: #1d4ed8;
-}
-
-table button:active {
-  transform: scale(0.94);
-}
-
-table button:disabled {
-  background: #94a3b8;
-  cursor: not-allowed;
-  transform: none;
-}
-
-/* Overlay (for mobile menu or popup)
-   Sits below the sidebar (950) and topbar (1000) so it darkens the page
-   behind the open sidebar without covering it. */
+/* ---------- Overlay ---------- */
 .overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.4);
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(15,23,42,0.5);
+  backdrop-filter: blur(2px);
   z-index: 900;
   animation: fadeIn 200ms ease;
 }
 
-/* Responsive */
+/* ---------- Responsive layout ---------- */
 @media (max-width: 768px) {
-  .stats-container {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .sidebar {
-    width: 200px;
-  }
-
-  .table-container {
-    overflow-x: auto;
-  }
+  .stats-container { grid-template-columns: 1fr; }
+  .sidebar { width: 260px; }
+  .table-container { overflow-x: auto; }
+  .dashboard-main { padding: 20px 16px; }
+  .topbar { padding: 0 14px; }
 }
 
-/* ROOT-CAUSE FIX: the sidebar was coded as an always-off-canvas mobile
-   drawer with no desktop state, and .dashboard-main never made room for it
-   (fixed-position sidebar just floated over content). On screens wide
-   enough for a real dashboard layout, the sidebar is now permanently
-   visible as a nav rail, the hamburger/overlay are hidden (nothing to
-   toggle), and the content area gets a matching margin-left so nothing
-   sits underneath it. */
 @media (min-width: 769px) {
   .sidebar {
     left: 0;
     box-shadow: none;
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid rgba(255,255,255,0.06);
   }
-
-  .menu-btn {
-    display: none;
-  }
-
-  .overlay {
-    display: none;
-  }
-
+  .menu-btn { display: none; }
+  .overlay { display: none; }
   .dashboard-main {
-    margin-left: 260px;
-    width: calc(100% - 260px);
+    margin-left: 264px;
+    width: calc(100% - 264px);
   }
-
-  .topbar {
-    padding-left: 280px;
-  }
+  .topbar { padding-left: 24px; }
+  .topbar::before { margin-left: 8px; }
 }
-/* ================= Phase 3 additions (extends existing dashboard styles, doesn't replace them) ================= */
+
+/* ============================================================
+   Section blocks, badges, inline actions, forms, modals
+   ============================================================ */
 
 .section-block {
   margin-top: 30px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-xs);
 }
+.section-block > h2:first-child,
+.section-block > h3:first-child { margin-top: 0; }
 
 .badge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: white;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  border: 1px solid transparent;
 }
+.badge::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor; opacity: 0.9;
+}
+/* Soft-tint badges (readable on light bg) */
+.badge-registered { background: #dcfce7; color: #166534; border-color:#bbf7d0; }
+.badge-waitlisted { background: #fef3c7; color: #92400e; border-color:#fde68a; }
+.badge-cancelled  { background: #f1f5f9; color: #475569; border-color:#e2e8f0; }
+.badge-attended   { background: #dbeafe; color: #1d4ed8; border-color:#bfdbfe; }
+.badge-draft      { background: #f1f5f9; color: #475569; border-color:#e2e8f0; }
+.badge-pending    { background: #fef3c7; color: #92400e; border-color:#fde68a; }
+.badge-published  { background: #dcfce7; color: #166534; border-color:#bbf7d0; }
+.badge-rejected   { background: #fee2e2; color: #b91c1c; border-color:#fecaca; }
+.badge-completed  { background: #dbeafe; color: #1d4ed8; border-color:#bfdbfe; }
 
-.badge-registered { background: #16a34a; }
-.badge-waitlisted { background: #d97706; }
-.badge-cancelled { background: #6b7280; }
-.badge-attended { background: #2563eb; }
-.badge-draft { background: #6b7280; }
-.badge-pending { background: #d97706; }
-.badge-published { background: #16a34a; }
-.badge-rejected { background: #dc2626; }
-.badge-completed { background: #2563eb; }
-
+/* Inline actions (buttons row) */
+.inline-actions { display: flex; flex-wrap: wrap; gap: 6px; }
 .inline-actions button {
-  margin-right: 8px;
-  margin-bottom: 4px;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 5px;
+  margin: 0;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
   cursor: pointer;
-  background: #2563eb;
-  color: white;
-  font-size: 13px;
-  transition: background 150ms ease, transform 100ms ease, opacity 150ms ease;
+  background: #fff;
+  color: var(--text);
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 150ms ease, transform 100ms ease, border-color 150ms ease, color 150ms ease;
 }
-
-.inline-actions button.danger { background: #dc2626; }
-.inline-actions button.secondary { background: #6b7280; }
-.inline-actions button:hover { opacity: 0.9; }
-.inline-actions button:active { transform: scale(0.94); }
+.inline-actions button:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-300);
+  color: var(--brand-700);
+}
+.inline-actions button:active { transform: scale(0.96); }
+.inline-actions button.danger {
+  background: #fff;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.inline-actions button.danger:hover { background: #fef2f2; border-color: #fca5a5; }
+.inline-actions button.secondary { background: #fff; color: var(--text-muted); }
+.inline-actions button.secondary:hover { background: var(--surface-2); color: var(--text); }
 .inline-actions button:disabled {
-  background: #cbd5e1;
-  color: #64748b;
-  cursor: not-allowed;
-  transform: none;
-  opacity: 1;
+  background: #f1f5f9; color: #94a3b8; border-color: var(--border);
+  cursor: not-allowed; transform: none; opacity: 1;
 }
 
+/* ---------- Form card ---------- */
 .form-card {
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  margin-bottom: 20px;
-  max-width: 600px;
+  background: var(--surface);
+  padding: 26px;
+  border-radius: var(--r-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+  margin-bottom: 22px;
+  max-width: 640px;
 }
-
 .form-card label {
   display: block;
-  margin-top: 12px;
-  margin-bottom: 4px;
+  margin-top: 14px;
+  margin-bottom: 6px;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
+  color: var(--ink-700);
+  letter-spacing: 0.01em;
 }
-
 .form-card input,
 .form-card select,
 .form-card textarea {
   width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
   font-size: 14px;
+  background: #fff;
+  color: var(--text);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  outline: none;
+  border-color: var(--brand-500);
+  box-shadow: var(--ring-brand);
+}
 .form-card .error-text {
-  color: #dc2626;
-  margin-top: 10px;
-  font-size: 14px;
+  color: #b91c1c;
+  margin-top: 12px;
+  font-size: 13px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  padding: 9px 12px;
+  border-radius: 8px;
 }
+.form-card button {
+  margin-top: 16px;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 10px;
+  background: var(--grad-brand);
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  box-shadow: var(--shadow-brand);
+  transition: transform 120ms ease, filter 150ms ease;
+}
+.form-card button:hover { transform: translateY(-1px); filter: brightness(1.05); }
 
+/* ---------- Modals ---------- */
 .qr-modal-backdrop {
-  position: fixed;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: fixed; inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
   z-index: 1100;
   animation: fadeIn 180ms ease;
+  padding: 20px;
 }
-
 .qr-modal {
-  background: white;
-  padding: 24px;
-  border-radius: 10px;
+  background: var(--surface);
+  padding: 28px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--border);
   text-align: center;
-  animation: slideUp 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 240ms cubic-bezier(0.4,0,0.2,1);
+  max-width: min(360px, 100%);
 }
-
-.qr-modal img { width: 250px; height: 250px; }
+.qr-modal img {
+  width: 240px; height: 240px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 8px;
+  background: #fff;
+}
+.qr-modal button {
+  margin-top: 18px;
+  padding: 10px 18px;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.qr-modal button:hover { background: var(--surface-2); }
 
 .remarks-box {
   width: 100%;
-  min-height: 60px;
+  min-height: 68px;
   margin-top: 8px;
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  font-family: inherit;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-
 .remarks-box:focus {
   outline: none;
-  border-color: #0d9488;
-  box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15);
+  border-color: var(--brand-500);
+  box-shadow: var(--ring-brand);
 }
 
-/* ================= Animations & Micro-interactions ================= */
+/* ---------- Animations ---------- */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
+.dashboard-main { animation: slideUp 320ms cubic-bezier(0.4,0,0.2,1); }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50%      { opacity: 0.5; }
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Every dashboard page's main content area fades/slides in on mount instead
-   of just snapping into view - makes navigation feel intentional. */
-.dashboard-main {
-  animation: slideUp 320ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Stat cards and table rows cascade in slightly staggered for a premium feel
-   rather than all appearing at once. */
-.stats-container .stat-card {
-  animation: slideUp 360ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
-}
+.stats-container .stat-card { animation: slideUp 360ms cubic-bezier(0.4,0,0.2,1) backwards; }
 .stats-container .stat-card:nth-child(1) { animation-delay: 0ms; }
 .stats-container .stat-card:nth-child(2) { animation-delay: 60ms; }
 .stats-container .stat-card:nth-child(3) { animation-delay: 120ms; }
 .stats-container .stat-card:nth-child(4) { animation-delay: 180ms; }
 .stats-container .stat-card:nth-child(5) { animation-delay: 240ms; }
 
-/* Generic inline loading spinner - use with a small <span className="spinner" />
-   inside a button while an async action is in flight. */
 .spinner {
   display: inline-block;
-  width: 13px;
-  height: 13px;
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  width: 13px; height: 13px;
+  border: 2px solid rgba(255,255,255,0.4);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 600ms linear infinite;
@@ -463,25 +521,23 @@ table button:disabled {
   margin-right: 6px;
 }
 
-/* Skeleton placeholder for content that's still loading (rows/cards). */
 .skeleton {
-  background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 37%, #e2e8f0 63%);
+  background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 37%, #eef2f7 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
-  border-radius: 6px;
+  border-radius: 8px;
 }
-
 @keyframes shimmer {
   0%   { background-position: 100% 50%; }
   100% { background-position: 0 50%; }
 }
 
-/* Respect users who've asked for reduced motion - disable all decorative
-   animation/transition instead of forcing it on them. */
+/* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 }
