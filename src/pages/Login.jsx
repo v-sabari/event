@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api, { auth, apiErrorMessage } from "../services/api";
 import "./Dashboard.css"; // reuse the existing .spinner class for the loading button state
 
@@ -79,6 +79,10 @@ function Login() {
             disabled={loading}
           />
         </div>
+
+        <p className="login-subtitle" style={{ textAlign: "right", marginTop: -6 }}>
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
 
         {error && <div id="result">{error}</div>}
 

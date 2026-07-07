@@ -3,23 +3,32 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import EventCard from "../components/EventCard";
 import { Link } from "react-router-dom";
+import api from "../services/api";
+
+// Preview count for the homepage teaser section - the full, filterable list
+// lives on Events.jsx, so this stays intentionally short.
+const HOME_PREVIEW_COUNT = 4;
 
 function Home() {
 
-  const [events] = useState([
-  {
-    title: "Tech Fest",
-    date: "2026-03-20",
-    location: "Auditorium",
-    fee: 200,
-  },
-  {
-    title: "Workshop",
-    date: "2026-04-10",
-    location: "Lab",
-    fee: 100,
-  }
-]);
+  const [events, setEvents] = useState([]);
+
+  useEffect(() => {
+    // Public, unauthenticated endpoint - same one Calendar.jsx and
+    // Events.jsx already use. Errors are swallowed rather than shown as a
+    // banner (consistent with Calendar.jsx): this is a public marketing
+    // page, so an empty "Upcoming Events" section is an acceptable fallback
+    // rather than surfacing a scary error to anonymous visitors.
+    api.get("/api/events/published")
+      .then((res) => {
+        const upcoming = res.data.data
+          .filter((e) => new Date(e.startTime) > new Date())
+          .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))
+          .slice(0, HOME_PREVIEW_COUNT);
+        setEvents(upcoming);
+      })
+      .catch(() => setEvents([]));
+  }, []);
 
   return (
     <div>
@@ -45,9 +54,15 @@ function Home() {
 
       <div className="products-section">
 
-        {events.map((event, index) => (
-          <EventCard key={index} event={event} />
+        {events.map((event) => (
+          <EventCard key={event.id} event={event} />
         ))}
+
+        {events.length === 0 && (
+          <p style={{ textAlign: "center", width: "100%" }}>
+            No upcoming events right now — check back soon!
+          </p>
+        )}
 
       </div>
 

@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import EventCard from "../components/EventCard";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import api from "../services/api";
 
 // Search & Filters module: Event Name, Department, Category, Venue, Date.
@@ -56,7 +58,9 @@ function Events() {
   };
 
   return (
-    <div className="dashboard-main">
+    <>
+      <Navbar />
+      <div className="dashboard-main">
 
       <h2>All Events</h2>
 
@@ -108,7 +112,9 @@ function Events() {
 
       </div>
 
-    </div>
+      </div>
+      <Footer />
+    </>
   );
 }
 

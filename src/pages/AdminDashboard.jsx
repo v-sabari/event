@@ -40,6 +40,7 @@ function AdminDashboard() {
         <h2>Admin Panel</h2>
         <ul>
           <li onClick={() => { setOpen(false); navigate("/dashboard"); }}>Overview</li>
+          <li onClick={() => { setOpen(false); navigate("/users"); }}>Manage Users</li>
           <li onClick={() => { setOpen(false); navigate("/reports"); }}>Reports</li>
           <li onClick={() => { setOpen(false); navigate("/venues"); }}>Manage Venues</li>
           <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>

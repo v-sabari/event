@@ -3,6 +3,7 @@ import "./App.css";
 
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
 import Events from "./pages/Events.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import CreateEvent from "./pages/CreateEvent.jsx";
@@ -12,6 +13,7 @@ import Calendar from "./pages/Calendar.jsx";
 import VenueManagement from "./pages/VenueManagement.jsx";
 import Reports from "./pages/Reports.jsx";
 import Notifications from "./pages/Notifications.jsx";
+import UserManagement from "./pages/UserManagement.jsx";
 import CustomCursor from "./components/CustomCursor.jsx";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -30,6 +32,8 @@ function App() {
           <Route path="/" element={<Home />} />
 
           <Route path="/login" element={<Login />} />
+
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route path="/dashboard" element={<Dashboard />} />
 
@@ -54,6 +58,9 @@ function App() {
 
           {/* Notifications (any authenticated user) */}
           <Route path="/notifications" element={<Notifications />} />
+
+          {/* User Management (admin/faculty) */}
+          <Route path="/users" element={<UserManagement />} />
 
         </Routes>
 

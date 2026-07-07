@@ -11,6 +11,18 @@ import "./Dashboard.css";
 function CreateEvent() {
   const navigate = useNavigate();
   const { id } = useParams(); // present when editing an existing draft
+  const role = localStorage.getItem("role");
+
+  // Matches EventController's @PreAuthorize("hasAnyRole('STUDENT_ORGANIZER','SUPER_ADMIN')")
+  // on both POST /api/events and PUT /api/events/{id} - every other
+  // restricted page in the app redirects before rendering the form; this
+  // one previously rendered the full form for any authenticated user and
+  // only failed on submit.
+  useEffect(() => {
+    if (!["STUDENT_ORGANIZER", "SUPER_ADMIN"].includes(role)) {
+      navigate("/login");
+    }
+  }, [role, navigate]);
 
   const [form, setForm] = useState({
     title: "",

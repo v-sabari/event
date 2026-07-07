@@ -161,6 +161,9 @@ function FacultyDashboard() {
           {role === "SUPER_ADMIN" && (
             <li onClick={() => { setOpen(false); navigate("/venues"); }}>Manage Venues</li>
           )}
+          {(role === "SUPER_ADMIN" || role === "FACULTY_COORDINATOR") && (
+            <li onClick={() => { setOpen(false); navigate("/users"); }}>Manage Users</li>
+          )}
           <li onClick={() => { setOpen(false); navigate("/reports"); }}>Reports</li>
           <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>
           <li onClick={() => { setOpen(false); navigate("/notifications"); }}>Notifications</li>
