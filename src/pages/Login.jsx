@@ -89,7 +89,7 @@ function Login() {
               Signing in...
             </>
           ) : (
-            "Login"
+            "Sign In"
           )}
         </button>
 
