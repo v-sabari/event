@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-
+import './styles/quick-wins.css'
 import './index.css'
 import './App.css'   // ⭐ VERY IMPORTANT
 

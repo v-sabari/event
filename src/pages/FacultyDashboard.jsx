@@ -161,6 +161,15 @@ function FacultyDashboard() {
           {role === "SUPER_ADMIN" && (
             <li onClick={() => { setOpen(false); navigate("/venues"); }}>Manage Venues</li>
           )}
+          {role === "SUPER_ADMIN" && (
+            <li onClick={() => { setOpen(false); navigate("/departments"); }}>Manage Departments</li>
+          )}
+          {(role === "SUPER_ADMIN" || role === "FACULTY_COORDINATOR") && (
+            <li onClick={() => { setOpen(false); navigate("/clubs"); }}>Manage Clubs</li>
+          )}
+          {(role === "SUPER_ADMIN" || role === "FACULTY_COORDINATOR") && (
+            <li onClick={() => { setOpen(false); navigate("/event-categories"); }}>Manage Event Categories</li>
+          )}
           {(role === "SUPER_ADMIN" || role === "FACULTY_COORDINATOR") && (
             <li onClick={() => { setOpen(false); navigate("/users"); }}>Manage Users</li>
           )}

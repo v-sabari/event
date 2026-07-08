@@ -11,6 +11,9 @@ import OrganizerDashboard from "./pages/OrganizerDashboard.jsx";
 import EventRoster from "./pages/EventRoster.jsx";
 import Calendar from "./pages/Calendar.jsx";
 import VenueManagement from "./pages/VenueManagement.jsx";
+import DepartmentManagement from "./pages/DepartmentManagement.jsx";
+import ClubManagement from "./pages/ClubManagement.jsx";
+import EventCategoryManagement from "./pages/EventCategoryManagement.jsx";
 import Reports from "./pages/Reports.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import UserManagement from "./pages/UserManagement.jsx";
@@ -52,6 +55,15 @@ function App() {
 
           {/* Venue Management (admin/faculty) */}
           <Route path="/venues" element={<VenueManagement />} />
+
+          {/* Department Management (admin only - see DepartmentController) */}
+          <Route path="/departments" element={<DepartmentManagement />} />
+
+          {/* Club Management (admin/faculty) */}
+          <Route path="/clubs" element={<ClubManagement />} />
+
+          {/* Event Category Management (admin/faculty) */}
+          <Route path="/event-categories" element={<EventCategoryManagement />} />
 
           {/* Reports (admin/faculty/HOD) */}
           <Route path="/reports" element={<Reports />} />

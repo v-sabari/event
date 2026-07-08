@@ -107,6 +107,9 @@ function AdminDashboard() {
           <li onClick={() => { setOpen(false); navigate("/users"); }}>Manage Users</li>
           <li onClick={() => { setOpen(false); navigate("/reports"); }}>Reports</li>
           <li onClick={() => { setOpen(false); navigate("/venues"); }}>Manage Venues</li>
+          <li onClick={() => { setOpen(false); navigate("/departments"); }}>Manage Departments</li>
+          <li onClick={() => { setOpen(false); navigate("/clubs"); }}>Manage Clubs</li>
+          <li onClick={() => { setOpen(false); navigate("/event-categories"); }}>Manage Event Categories</li>
           <li onClick={() => { setOpen(false); navigate("/calendar"); }}>Event Calendar</li>
           <li onClick={() => { setOpen(false); navigate("/events"); }}>Search Events</li>
         </ul>
