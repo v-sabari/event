@@ -6,7 +6,6 @@ import "./Dashboard.css";
 function AdminDashboard() {
   const navigate = useNavigate();
   const name = localStorage.getItem("name");
-  const role = localStorage.getItem("role");
 
   const [open, setOpen] = useState(false);
   const [summary, setSummary] = useState(null);
@@ -23,9 +22,9 @@ function AdminDashboard() {
   const [remarks, setRemarks] = useState("");
   const [processingId, setProcessingId] = useState(null);
 
-  useEffect(() => {
-    if (role !== "SUPER_ADMIN") navigate("/login");
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (App.jsx wraps /dashboard,
+  // and Dashboard.jsx only renders AdminDashboard for role === "SUPER_ADMIN"
+  // in the first place - this component has no route of its own).
 
   useEffect(() => {
     api.get("/api/dashboard/admin")

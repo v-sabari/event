@@ -34,17 +34,20 @@ function FacultyDashboard() {
 
   const [pending, setPending] = useState([]);
   const [allEvents, setAllEvents] = useState([]);
+  const [eventsPage, setEventsPage] = useState(0);
+  const [eventsTotalPages, setEventsTotalPages] = useState(0);
+  const [eventsTotalElements, setEventsTotalElements] = useState(0);
   const [error, setError] = useState("");
   const [remarksFor, setRemarksFor] = useState(null);
   const [remarks, setRemarks] = useState("");
   const [processingId, setProcessingId] = useState(null);
 
-  // Route Protection
-  useEffect(() => {
-    if (!role || !["FACULTY_COORDINATOR", "HOD", "SUPER_ADMIN"].includes(role)) {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (App.jsx wraps
+  // /dashboard, and Dashboard.jsx only renders FacultyDashboard for
+  // FACULTY_COORDINATOR/HOD - this component has no route of its own).
+  // `role` is still used below for conditional sidebar links.
+
+  const EVENTS_PAGE_SIZE = 20;
 
   const loadPending = async () => {
     try {
@@ -55,10 +58,14 @@ function FacultyDashboard() {
     }
   };
 
-  const loadAllEvents = async () => {
+  // BE-17: GET /api/events (myVisibleEvents) now returns a Page<EventResponseDTO>.
+  const loadAllEvents = async (targetPage = eventsPage) => {
     try {
-      const res = await api.get("/api/events");
-      setAllEvents(res.data.data);
+      const res = await api.get("/api/events", { params: { page: targetPage, size: EVENTS_PAGE_SIZE } });
+      setAllEvents(res.data.data.content);
+      setEventsTotalPages(res.data.data.totalPages);
+      setEventsTotalElements(res.data.data.totalElements);
+      setEventsPage(targetPage);
     } catch (err) {
       setError(apiErrorMessage(err, "Could not load events."));
     }
@@ -66,7 +73,8 @@ function FacultyDashboard() {
 
   useEffect(() => {
     loadPending();
-    loadAllEvents();
+    loadAllEvents(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const logout = () => {
@@ -119,9 +127,18 @@ function FacultyDashboard() {
     }
   };
 
-  const totalRegistrationsAcrossPublished = allEvents
-    .filter((e) => e.status === "PUBLISHED" || e.status === "COMPLETED")
-    .length; // roster counts are per-event (fetched on the roster page); this is a lightweight proxy stat.
+  // BE-17: this used to be `allEvents.filter(status in [PUBLISHED, COMPLETED]).length`
+  // as "a lightweight proxy stat" (per the original comment) computed over
+  // the full visible-events list. Now that GET /api/events is paginated,
+  // allEvents only holds one page, so that count can no longer be computed
+  // accurately client-side without fetching every page (which would just
+  // reintroduce the unbounded-fetch problem this bug is fixing). There is
+  // no backend dashboard summary endpoint for FACULTY_COORDINATOR/HOD today
+  // (DashboardService only has adminSummary/organizerSummary/studentSummary)
+  // to source this from server-side instead, so the stat card is removed
+  // rather than left silently wrong. A proper fix would add a
+  // facultySummary()/hodSummary() to DashboardService with a real COUNT
+  // query - flagged as follow-up work, not done here to stay in scope.
 
   return (
     <div className="dashboard">
@@ -198,12 +215,10 @@ function FacultyDashboard() {
 
           <div className="stat-card">
             <h3>Total Events (visible to you)</h3>
-            <p>{allEvents.length}</p>
-          </div>
-
-          <div className="stat-card">
-            <h3>Published/Completed</h3>
-            <p>{totalRegistrationsAcrossPublished}</p>
+            {/* BE-17: was allEvents.length, which only reflected one page.
+                totalElements comes straight from the backend's Page<T>
+                metadata, so it's exact regardless of page size. */}
+            <p>{eventsTotalElements}</p>
           </div>
 
         </div>
@@ -293,6 +308,14 @@ function FacultyDashboard() {
               )}
             </tbody>
           </table>
+
+          {eventsTotalPages > 1 && (
+            <div className="inline-actions" style={{ marginTop: 12, justifyContent: "space-between" }}>
+              <button className="secondary" disabled={eventsPage === 0} onClick={() => loadAllEvents(eventsPage - 1)}>← Prev</button>
+              <span>Page {eventsPage + 1} of {eventsTotalPages} ({eventsTotalElements} events)</span>
+              <button className="secondary" disabled={eventsPage + 1 >= eventsTotalPages} onClick={() => loadAllEvents(eventsPage + 1)}>Next →</button>
+            </div>
+          )}
         </div>
 
       </div>

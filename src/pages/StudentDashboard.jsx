@@ -16,7 +16,6 @@ function StudentDashboard() {
   const navigate = useNavigate();
 
   const name = localStorage.getItem("name");
-  const role = localStorage.getItem("role");
 
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("dashboard");
@@ -30,12 +29,9 @@ function StudentDashboard() {
   const [feedbackForm, setFeedbackForm] = useState({ rating: 5, comments: "" });
   const [processingId, setProcessingId] = useState(null); // id of the event/registration currently being acted on
 
-  // Route Protection (fixed to match the real backend role value: "STUDENT")
-  useEffect(() => {
-    if (!role || role !== "STUDENT") {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (App.jsx wraps
+  // /dashboard, and Dashboard.jsx only renders StudentDashboard for
+  // role === "STUDENT" - this component has no route of its own).
 
   // Fetch published events (Event Calendar / browse module)
   const fetchEvents = async () => {

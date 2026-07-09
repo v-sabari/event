@@ -4,6 +4,13 @@ import api, { apiErrorMessage } from "../services/api";
 import "./Dashboard.css";
 
 const emptyForm = { name: "", description: "", departmentId: "", coordinatorId: "" };
+const PAGE_SIZE = 20;
+// BE-17: department/coordinator dropdowns need the FULL set, not one page -
+// LOOKUP_SIZE is a deliberately large, explicit bound (a college has at most
+// a few dozen departments/coordinators) so these selects still show every
+// option, without reverting to the old "return literally everything with no
+// limit" behavior the bug is about.
+const LOOKUP_SIZE = 1000;
 
 // FE-06: Clubs are master data fully supported by ClubController
 // (create/update by SUPER_ADMIN/FACULTY_COORDINATOR, delete SUPER_ADMIN,
@@ -16,6 +23,9 @@ function ClubManagement() {
   const canDelete = role === "SUPER_ADMIN";
 
   const [clubs, setClubs] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [departments, setDepartments] = useState([]);
   const [coordinators, setCoordinators] = useState([]);
   const [form, setForm] = useState(emptyForm);
@@ -24,31 +34,36 @@ function ClubManagement() {
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!["SUPER_ADMIN", "FACULTY_COORDINATOR"].includes(role)) {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (wraps /clubs in
+  // App.jsx). `role` is still used above for `canDelete`.
 
-  const load = async () => {
+  // BE-17: GET /api/clubs now returns a Page<ClubResponseDTO>.
+  const load = async (targetPage = page) => {
     try {
-      const res = await api.get("/api/clubs");
-      setClubs(res.data.data);
+      const res = await api.get("/api/clubs", { params: { page: targetPage, size: PAGE_SIZE } });
+      setClubs(res.data.data.content);
+      setTotalPages(res.data.data.totalPages);
+      setTotalElements(res.data.data.totalElements);
+      setPage(targetPage);
     } catch (err) {
       setError(apiErrorMessage(err, "Could not load clubs."));
     }
   };
 
   useEffect(() => {
-    load();
-    api.get("/api/departments")
-      .then((res) => setDepartments(res.data.data))
+    load(0);
+    // BE-17: GET /api/departments and GET /api/users?role= now also return
+    // Page<T> - these two calls populate <select> dropdowns, so they need
+    // the full set (LOOKUP_SIZE), and the array now lives at .content.
+    api.get("/api/departments", { params: { size: LOOKUP_SIZE } })
+      .then((res) => setDepartments(res.data.data.content))
       .catch(() => setDepartments([]));
     // Coordinators are users with role FACULTY_COORDINATOR - used to
     // populate the "Coordinator" dropdown (UserController ?role= filter).
-    api.get("/api/users", { params: { role: "FACULTY_COORDINATOR" } })
-      .then((res) => setCoordinators(res.data.data))
+    api.get("/api/users", { params: { role: "FACULTY_COORDINATOR", size: LOOKUP_SIZE } })
+      .then((res) => setCoordinators(res.data.data.content))
       .catch(() => setCoordinators([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resetForm = () => {
@@ -81,11 +96,12 @@ function ClubManagement() {
     try {
       if (editingId) {
         await api.put(`/api/clubs/${editingId}`, payload);
+        load();
       } else {
         await api.post("/api/clubs", payload);
+        load(0); // new club - safest to go back to page 0
       }
       resetForm();
-      load();
     } catch (err) {
       setFormError(apiErrorMessage(err, "Could not save club."));
     } finally {
@@ -106,7 +122,8 @@ function ClubManagement() {
     if (!window.confirm("Delete this club?")) return;
     try {
       await api.delete(`/api/clubs/${id}`);
-      load();
+      const wasLastRowOnPage = clubs.length === 1 && page > 0;
+      load(wasLastRowOnPage ? page - 1 : page);
     } catch (err) {
       alert(apiErrorMessage(err, "Could not delete club (it may be in use)."));
     }
@@ -187,6 +204,14 @@ function ClubManagement() {
             {clubs.length === 0 && <tr><td colSpan={5}>No clubs yet.</td></tr>}
           </tbody>
         </table>
+
+        {totalPages > 1 && (
+          <div className="inline-actions" style={{ marginTop: 12, justifyContent: "space-between" }}>
+            <button className="secondary" disabled={page === 0} onClick={() => load(page - 1)}>← Prev</button>
+            <span>Page {page + 1} of {totalPages} ({totalElements} clubs)</span>
+            <button className="secondary" disabled={page + 1 >= totalPages} onClick={() => load(page + 1)}>Next →</button>
+          </div>
+        )}
       </div>
     </div>
   );

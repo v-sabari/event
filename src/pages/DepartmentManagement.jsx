@@ -4,6 +4,10 @@ import api, { apiErrorMessage } from "../services/api";
 import "./Dashboard.css";
 
 const emptyForm = { name: "", code: "", description: "", hodId: "", hodApprovalRequired: false };
+const PAGE_SIZE = 20;
+// BE-17: the HOD dropdown needs the full set, not one page - see
+// ClubManagement.jsx's LOOKUP_SIZE comment for the reasoning.
+const LOOKUP_SIZE = 1000;
 
 // FE-06: Departments are master data fully supported by DepartmentController
 // (create/update/delete, all SUPER_ADMIN-only) but previously had no UI at
@@ -13,9 +17,11 @@ const emptyForm = { name: "", code: "", description: "", hodId: "", hodApprovalR
 // (no edit button despite a working PUT) isn't something to repeat here.
 function DepartmentManagement() {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role");
 
   const [departments, setDepartments] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [hods, setHods] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
@@ -23,30 +29,34 @@ function DepartmentManagement() {
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Writes on /api/departments are SUPER_ADMIN-only (DepartmentController),
-  // so unlike Venues/Clubs this page has no FACULTY_COORDINATOR access at all.
-  useEffect(() => {
-    if (role !== "SUPER_ADMIN") {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (wraps /departments in
+  // App.jsx, allowedRoles=["SUPER_ADMIN"] - DepartmentController writes are
+  // SUPER_ADMIN-only, so unlike Venues/Clubs this page has no
+  // FACULTY_COORDINATOR access at all).
 
-  const load = async () => {
+  // BE-17: GET /api/departments now returns a Page<DepartmentResponseDTO>.
+  const load = async (targetPage = page) => {
     try {
-      const res = await api.get("/api/departments");
-      setDepartments(res.data.data);
+      const res = await api.get("/api/departments", { params: { page: targetPage, size: PAGE_SIZE } });
+      setDepartments(res.data.data.content);
+      setTotalPages(res.data.data.totalPages);
+      setTotalElements(res.data.data.totalElements);
+      setPage(targetPage);
     } catch (err) {
       setError(apiErrorMessage(err, "Could not load departments."));
     }
   };
 
   useEffect(() => {
-    load();
+    load(0);
     // HODs are users with role HOD - used to populate the "Head of
     // Department" dropdown (UserController supports ?role= filtering).
-    api.get("/api/users", { params: { role: "HOD" } })
-      .then((res) => setHods(res.data.data))
+    // BE-17: that endpoint is also paginated now, so request the full set
+    // via LOOKUP_SIZE and unwrap .content.
+    api.get("/api/users", { params: { role: "HOD", size: LOOKUP_SIZE } })
+      .then((res) => setHods(res.data.data.content))
       .catch(() => setHods([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resetForm = () => {
@@ -81,11 +91,12 @@ function DepartmentManagement() {
     try {
       if (editingId) {
         await api.put(`/api/departments/${editingId}`, payload);
+        load();
       } else {
         await api.post("/api/departments", payload);
+        load(0);
       }
       resetForm();
-      load();
     } catch (err) {
       setFormError(apiErrorMessage(err, "Could not save department."));
     } finally {
@@ -97,7 +108,8 @@ function DepartmentManagement() {
     if (!window.confirm("Delete this department?")) return;
     try {
       await api.delete(`/api/departments/${id}`);
-      load();
+      const wasLastRowOnPage = departments.length === 1 && page > 0;
+      load(wasLastRowOnPage ? page - 1 : page);
     } catch (err) {
       alert(apiErrorMessage(err, "Could not delete department (it may be in use)."));
     }
@@ -177,6 +189,14 @@ function DepartmentManagement() {
             {departments.length === 0 && <tr><td colSpan={5}>No departments yet.</td></tr>}
           </tbody>
         </table>
+
+        {totalPages > 1 && (
+          <div className="inline-actions" style={{ marginTop: 12, justifyContent: "space-between" }}>
+            <button className="secondary" disabled={page === 0} onClick={() => load(page - 1)}>← Prev</button>
+            <span>Page {page + 1} of {totalPages} ({totalElements} departments)</span>
+            <button className="secondary" disabled={page + 1 >= totalPages} onClick={() => load(page + 1)}>Next →</button>
+          </div>
+        )}
       </div>
     </div>
   );

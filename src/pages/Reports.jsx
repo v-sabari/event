@@ -5,7 +5,6 @@ import "./Dashboard.css";
 
 function Reports() {
   const navigate = useNavigate();
-  const role = localStorage.getItem("role");
 
   const [deptWise, setDeptWise] = useState([]);
   const [catWise, setCatWise] = useState([]);
@@ -16,11 +15,8 @@ function Reports() {
   const [topStudent, setTopStudent] = useState(null);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!["SUPER_ADMIN", "FACULTY_COORDINATOR", "HOD"].includes(role)) {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (wraps /reports in
+  // App.jsx, allowedRoles=["SUPER_ADMIN", "FACULTY_COORDINATOR", "HOD"]).
 
   useEffect(() => {
     Promise.all([

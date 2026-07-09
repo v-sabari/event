@@ -17,32 +17,39 @@ const STATUS_BADGE = {
 function OrganizerDashboard() {
   const navigate = useNavigate();
   const name = localStorage.getItem("name");
-  const role = localStorage.getItem("role");
 
   const [open, setOpen] = useState(false);
   const [events, setEvents] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [error, setError] = useState("");
   const [historyFor, setHistoryFor] = useState(null);
   const [history, setHistory] = useState([]);
   const [winnerForm, setWinnerForm] = useState(null);
 
-  useEffect(() => {
-    if (role !== "STUDENT_ORGANIZER") {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute, which now wraps both
+  // /organizer directly and /dashboard (whose Dashboard.jsx dispatcher only
+  // renders this component for role === "STUDENT_ORGANIZER" anyway).
 
-  const loadEvents = async () => {
+  const PAGE_SIZE = 20;
+
+  // BE-17: GET /api/events (myVisibleEvents) now returns a Page<EventResponseDTO>.
+  const loadEvents = async (targetPage = page) => {
     try {
-      const res = await api.get("/api/events");
-      setEvents(res.data.data);
+      const res = await api.get("/api/events", { params: { page: targetPage, size: PAGE_SIZE } });
+      setEvents(res.data.data.content);
+      setTotalPages(res.data.data.totalPages);
+      setTotalElements(res.data.data.totalElements);
+      setPage(targetPage);
     } catch (err) {
       setError(apiErrorMessage(err, "Could not load your events."));
     }
   };
 
   useEffect(() => {
-    loadEvents();
+    loadEvents(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const logout = () => {
@@ -215,6 +222,14 @@ function OrganizerDashboard() {
               )}
             </tbody>
           </table>
+
+          {totalPages > 1 && (
+            <div className="inline-actions" style={{ marginTop: 12, justifyContent: "space-between" }}>
+              <button className="secondary" disabled={page === 0} onClick={() => loadEvents(page - 1)}>← Prev</button>
+              <span>Page {page + 1} of {totalPages} ({totalElements} events)</span>
+              <button className="secondary" disabled={page + 1 >= totalPages} onClick={() => loadEvents(page + 1)}>Next →</button>
+            </div>
+          )}
         </div>
       </div>
     </div>

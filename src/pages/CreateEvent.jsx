@@ -11,18 +11,11 @@ import "./Dashboard.css";
 function CreateEvent() {
   const navigate = useNavigate();
   const { id } = useParams(); // present when editing an existing draft
-  const role = localStorage.getItem("role");
 
-  // Matches EventController's @PreAuthorize("hasAnyRole('STUDENT_ORGANIZER','SUPER_ADMIN')")
-  // on both POST /api/events and PUT /api/events/{id} - every other
-  // restricted page in the app redirects before rendering the form; this
-  // one previously rendered the full form for any authenticated user and
-  // only failed on submit.
-  useEffect(() => {
-    if (!["STUDENT_ORGANIZER", "SUPER_ADMIN"].includes(role)) {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (wraps /create-event and
+  // /edit-event/:id in App.jsx). Matches EventController's
+  // @PreAuthorize("hasAnyRole('STUDENT_ORGANIZER','SUPER_ADMIN')") on both
+  // POST /api/events and PUT /api/events/{id}.
 
   const [form, setForm] = useState({
     title: "",
@@ -49,17 +42,23 @@ function CreateEvent() {
   useEffect(() => {
     // Master data for the dropdowns - all four are read-open to any
     // authenticated user per the backend's Venue/Category/Club/Department controllers.
+    // BE-17: all four now return Page<T> instead of a raw array. These are
+    // populating <select> dropdowns (not tables), so they need the full set,
+    // not one page - LOOKUP_SIZE is a deliberately large, explicit bound
+    // (a college has at most a few hundred of any of these), and the array
+    // now lives at .content.
+    const LOOKUP_SIZE = 1000;
     Promise.all([
-      api.get("/api/venues"),
-      api.get("/api/event-categories"),
-      api.get("/api/clubs"),
-      api.get("/api/departments"),
+      api.get("/api/venues", { params: { size: LOOKUP_SIZE } }),
+      api.get("/api/event-categories", { params: { size: LOOKUP_SIZE } }),
+      api.get("/api/clubs", { params: { size: LOOKUP_SIZE } }),
+      api.get("/api/departments", { params: { size: LOOKUP_SIZE } }),
     ])
       .then(([v, c, cl, d]) => {
-        setVenues(v.data.data);
-        setCategories(c.data.data);
-        setClubs(cl.data.data);
-        setDepartments(d.data.data);
+        setVenues(v.data.data.content);
+        setCategories(c.data.data.content);
+        setClubs(cl.data.data.content);
+        setDepartments(d.data.data.content);
       })
       .catch(() => setError("Failed to load form options. Please refresh."));
 

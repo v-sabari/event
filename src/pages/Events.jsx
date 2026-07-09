@@ -21,9 +21,14 @@ function Events() {
   });
 
   useEffect(() => {
-    api.get("/api/departments").then((res) => setDepartments(res.data.data)).catch(() => {});
-    api.get("/api/event-categories").then((res) => setCategories(res.data.data)).catch(() => {});
-    api.get("/api/venues").then((res) => setVenues(res.data.data)).catch(() => {});
+    // BE-17: these three populate filter <select> dropdowns (not tables),
+    // and all now return Page<T> - request the full set via a large,
+    // explicit size and unwrap .content. /api/events/search and
+    // /api/events/published below are untouched (out of this bug's scope).
+    const LOOKUP_SIZE = 1000;
+    api.get("/api/departments", { params: { size: LOOKUP_SIZE } }).then((res) => setDepartments(res.data.data.content)).catch(() => {});
+    api.get("/api/event-categories", { params: { size: LOOKUP_SIZE } }).then((res) => setCategories(res.data.data.content)).catch(() => {});
+    api.get("/api/venues", { params: { size: LOOKUP_SIZE } }).then((res) => setVenues(res.data.data.content)).catch(() => {});
   }, []);
 
   const loadEvents = () => {

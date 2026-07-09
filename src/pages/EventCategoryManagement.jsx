@@ -4,6 +4,7 @@ import api, { apiErrorMessage } from "../services/api";
 import "./Dashboard.css";
 
 const emptyForm = { name: "", description: "" };
+const PAGE_SIZE = 20;
 
 // FE-06: Event categories are master data fully supported by
 // EventCategoryController (create/update by SUPER_ADMIN/FACULTY_COORDINATOR,
@@ -17,29 +18,34 @@ function EventCategoryManagement() {
   const canDelete = role === "SUPER_ADMIN";
 
   const [categories, setCategories] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState("");
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (!["SUPER_ADMIN", "FACULTY_COORDINATOR"].includes(role)) {
-      navigate("/login");
-    }
-  }, [role, navigate]);
+  // FE-02: role-check centralized in ProtectedRoute (wraps /event-categories
+  // in App.jsx). `role` is still used above for `canDelete`.
 
-  const load = async () => {
+  // BE-17: GET /api/event-categories now returns a Page<EventCategoryResponseDTO>.
+  const load = async (targetPage = page) => {
     try {
-      const res = await api.get("/api/event-categories");
-      setCategories(res.data.data);
+      const res = await api.get("/api/event-categories", { params: { page: targetPage, size: PAGE_SIZE } });
+      setCategories(res.data.data.content);
+      setTotalPages(res.data.data.totalPages);
+      setTotalElements(res.data.data.totalElements);
+      setPage(targetPage);
     } catch (err) {
       setError(apiErrorMessage(err, "Could not load event categories."));
     }
   };
 
   useEffect(() => {
-    load();
+    load(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const resetForm = () => {
@@ -61,11 +67,12 @@ function EventCategoryManagement() {
     try {
       if (editingId) {
         await api.put(`/api/event-categories/${editingId}`, form);
+        load();
       } else {
         await api.post("/api/event-categories", form);
+        load(0);
       }
       resetForm();
-      load();
     } catch (err) {
       setFormError(apiErrorMessage(err, "Could not save category."));
     } finally {
@@ -77,7 +84,8 @@ function EventCategoryManagement() {
     if (!window.confirm("Delete this event category?")) return;
     try {
       await api.delete(`/api/event-categories/${id}`);
-      load();
+      const wasLastRowOnPage = categories.length === 1 && page > 0;
+      load(wasLastRowOnPage ? page - 1 : page);
     } catch (err) {
       alert(apiErrorMessage(err, "Could not delete category (it may be in use by an event)."));
     }
@@ -135,6 +143,14 @@ function EventCategoryManagement() {
             {categories.length === 0 && <tr><td colSpan={3}>No event categories yet.</td></tr>}
           </tbody>
         </table>
+
+        {totalPages > 1 && (
+          <div className="inline-actions" style={{ marginTop: 12, justifyContent: "space-between" }}>
+            <button className="secondary" disabled={page === 0} onClick={() => load(page - 1)}>← Prev</button>
+            <span>Page {page + 1} of {totalPages} ({totalElements} categories)</span>
+            <button className="secondary" disabled={page + 1 >= totalPages} onClick={() => load(page + 1)}>Next →</button>
+          </div>
+        )}
       </div>
     </div>
   );

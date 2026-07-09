@@ -18,6 +18,8 @@ import Reports from "./pages/Reports.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import UserManagement from "./pages/UserManagement.jsx";
 import CustomCursor from "./components/CustomCursor.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import CommandPalette from "./components/CommandPalette.jsx";
 
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
@@ -32,49 +34,91 @@ function App() {
 
         <Routes>
 
+          {/* Public */}
           <Route path="/" element={<Home />} />
-
           <Route path="/login" element={<Login />} />
-
           <Route path="/forgot-password" element={<ForgotPassword />} />
-
-          <Route path="/dashboard" element={<Dashboard />} />
-
           <Route path="/events" element={<Events />} />
-
-          {/* Student Organizer */}
-          <Route path="/organizer" element={<OrganizerDashboard />} />
-          <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/edit-event/:id" element={<CreateEvent />} />
-
-          {/* Shared: roster/attendance (organizer + faculty/HOD/admin) */}
-          <Route path="/events/:id/roster" element={<EventRoster />} />
-
           {/* Event Calendar (public) */}
           <Route path="/calendar" element={<Calendar />} />
 
-          {/* Venue Management (admin/faculty) */}
-          <Route path="/venues" element={<VenueManagement />} />
+          {/* FE-02: dispatches to the right role-specific dashboard
+              (Admin/Faculty/Organizer/Student) internally - any
+              authenticated user is allowed in here, so no allowedRoles.
+              This also fixes a real gap: previously an anonymous visitor
+              hitting /dashboard directly saw "Invalid Role" text instead
+              of being redirected to /login, since Dashboard.jsx had no
+              guard of its own at all. */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute><Dashboard /></ProtectedRoute>
+          } />
 
-          {/* Department Management (admin only - see DepartmentController) */}
-          <Route path="/departments" element={<DepartmentManagement />} />
+          {/* Student Organizer - matches CreateEventController.java role /
+              Dashboard.jsx's STUDENT_ORGANIZER branch. Reachable both via
+              /dashboard (through Dashboard.jsx's branching) and directly
+              here, so it needs its own guard. */}
+          <Route path="/organizer" element={
+            <ProtectedRoute allowedRoles={["STUDENT_ORGANIZER"]}><OrganizerDashboard /></ProtectedRoute>
+          } />
+          {/* EventController: createDraft/updateDraft allow STUDENT_ORGANIZER and SUPER_ADMIN. */}
+          <Route path="/create-event" element={
+            <ProtectedRoute allowedRoles={["STUDENT_ORGANIZER", "SUPER_ADMIN"]}><CreateEvent /></ProtectedRoute>
+          } />
+          <Route path="/edit-event/:id" element={
+            <ProtectedRoute allowedRoles={["STUDENT_ORGANIZER", "SUPER_ADMIN"]}><CreateEvent /></ProtectedRoute>
+          } />
 
-          {/* Club Management (admin/faculty) */}
-          <Route path="/clubs" element={<ClubManagement />} />
+          {/* FE-02: previously had NO protection at all. Roles match
+              RegistrationController's GET /api/events/{id}/registrations,
+              AttendanceController's POST /api/attendance/scan, and
+              CertificateController's POST .../certificate - all three are
+              @PreAuthorize("hasAnyRole('STUDENT_ORGANIZER','FACULTY_COORDINATOR','HOD','SUPER_ADMIN')"),
+              i.e. every role EventRoster.jsx actually calls, deliberately
+              excluding STUDENT. */}
+          <Route path="/events/:id/roster" element={
+            <ProtectedRoute allowedRoles={["STUDENT_ORGANIZER", "FACULTY_COORDINATOR", "HOD", "SUPER_ADMIN"]}><EventRoster /></ProtectedRoute>
+          } />
 
-          {/* Event Category Management (admin/faculty) */}
-          <Route path="/event-categories" element={<EventCategoryManagement />} />
+          {/* Venue Management - VenueController writes allow SUPER_ADMIN/FACULTY_COORDINATOR. */}
+          <Route path="/venues" element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "FACULTY_COORDINATOR"]}><VenueManagement /></ProtectedRoute>
+          } />
 
-          {/* Reports (admin/faculty/HOD) */}
-          <Route path="/reports" element={<Reports />} />
+          {/* Department Management - DepartmentController writes are SUPER_ADMIN-only. */}
+          <Route path="/departments" element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN"]}><DepartmentManagement /></ProtectedRoute>
+          } />
 
-          {/* Notifications (any authenticated user) */}
-          <Route path="/notifications" element={<Notifications />} />
+          {/* Club Management - ClubController writes allow SUPER_ADMIN/FACULTY_COORDINATOR. */}
+          <Route path="/clubs" element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "FACULTY_COORDINATOR"]}><ClubManagement /></ProtectedRoute>
+          } />
 
-          {/* User Management (admin/faculty) */}
-          <Route path="/users" element={<UserManagement />} />
+          {/* Event Category Management - same role split as Clubs. */}
+          <Route path="/event-categories" element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "FACULTY_COORDINATOR"]}><EventCategoryManagement /></ProtectedRoute>
+          } />
+
+          {/* Reports - matches Reports.jsx's original SUPER_ADMIN/FACULTY_COORDINATOR/HOD check. */}
+          <Route path="/reports" element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "FACULTY_COORDINATOR", "HOD"]}><Reports /></ProtectedRoute>
+          } />
+
+          {/* FE-02: previously had NO protection at all. NotificationController
+              has no @PreAuthorize - it just scopes every query to
+              currentUser.getId() - so any authenticated user is allowed,
+              not a specific role. */}
+          <Route path="/notifications" element={
+            <ProtectedRoute><Notifications /></ProtectedRoute>
+          } />
+
+          {/* User Management - UserController's POST/GET allow SUPER_ADMIN/FACULTY_COORDINATOR. */}
+          <Route path="/users" element={
+            <ProtectedRoute allowedRoles={["SUPER_ADMIN", "FACULTY_COORDINATOR"]}><UserManagement /></ProtectedRoute>
+          } />
 
         </Routes>
+            <CommandPalette />
 
       </div>
 
