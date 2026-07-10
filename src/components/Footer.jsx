@@ -28,8 +28,8 @@ function Footer() {
           <h3>Contact</h3>
 
           <p>Email: campusconnect@gmail.com</p>
-          <p>Phone: +91 9876543210</p>
-          <p>Location: Your College</p>
+          <p>Phone: +91 6379766032</p>
+          <p>Location: Erode Sengunthar Engineering College</p>
 
         </div>
 

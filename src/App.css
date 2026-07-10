@@ -22,25 +22,7 @@
   border-bottom: 1px solid var(--border);
 }
 
-.logo {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  background: var(--grad-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  display: flex; align-items: center; gap: 10px;
-}
-.logo::before {
-  content: "";
-  width: 26px; height: 26px;
-  border-radius: 8px;
-  background: var(--grad-brand);
-  box-shadow: var(--shadow-brand);
-  display: inline-block;
-}
+
 
 .nav-links { display: flex; align-items: center; gap: 6px; }
 
