@@ -74,7 +74,7 @@ function VenueManagement() {
 
   return (
     <div className="dashboard-main">
-      <button onClick={() => navigate(-1)} style={{ marginBottom: 10 }}>← Back</button>
+      <button className="back-btn" onClick={() => navigate(-1)}>← Back</button>
       <h2>Venue Management</h2>
 
       {error && <div className="error-text">{error}</div>}
