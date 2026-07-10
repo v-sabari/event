@@ -39,8 +39,10 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-      <h1 className="logo">Campus Connect</h1>
+      <div className="logo-wrap">
+        <img src="/favicon.ico" alt="Campus Connect logo" className="logo-icon" />
+        <h1 className="logo">Campus Connect</h1>
+      </div>
 
       <div className="nav-links">
         <Link to="/">Home</Link>
