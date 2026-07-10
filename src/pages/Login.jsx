@@ -51,7 +51,7 @@ function Login() {
 
       <form className="L" onSubmit={handleLogin}>
 
-        <div className="login-brand">CC</div>
+        <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
 
         <h2>Campus Connect</h2>
         <p className="login-subtitle">Sign in to your account</p>
