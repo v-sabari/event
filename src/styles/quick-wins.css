@@ -291,6 +291,7 @@ div#result::before {
   outline: 2px solid var(--brand-500, #14b8a6);
   outline-offset: 2px;
 }
+
 .logo-wrap {
   display: flex;
   align-items: center;
@@ -301,5 +302,5 @@ div#result::before {
   width: 32px;
   height: 32px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 8px; /* remove if you don't want rounded corners */
 }
