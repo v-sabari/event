@@ -10,6 +10,7 @@
 
 ## Table of Contents
 
+- [Demo Credentials](#demo-credentials)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Roles & Permissions](#roles--permissions)
@@ -21,6 +22,21 @@
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
+
+---
+
+## Demo Credentials
+
+Want to try each role without setting anything up? Use these accounts on the [live demo](https://event-two-ivory.vercel.app/):
+
+| Role | Username | Password |
+|---|---|---|
+| HOD | `HOD001` | `Hod@123` |
+| Faculty Coordinator | `FAC001` | `Faculty@123` |
+| Student Organizer | `ORG001` | `Organizer@123` |
+| Student | `STU2026001` | `Student@123` |
+
+> ⚠️ These are **seeded demo accounts** for evaluation only — please don't reuse these credentials for anything real, and don't rely on them existing forever (they may be reset or rotated).
 
 ---
 
